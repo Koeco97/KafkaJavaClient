@@ -9,10 +9,16 @@ public class Sender {
     private String topic;
     private Producer producer = createProducer();
     Scanner scanner = new Scanner(System.in);
+    private boolean isOpen = true;
 
     public Sender(String topic) {
         this.topic = topic;
     }
+
+    public boolean isOpen() {
+        return isOpen;
+    }
+
 
     private Producer createProducer(){
         Properties props = setProperties();
@@ -34,14 +40,13 @@ public class Sender {
         return props;
     }
 
-    public synchronized int send(){
+    public synchronized void send(){
         System.out.println("enter message");
         String message = scanner.nextLine();
         if (message.equals("exit")) {
-            return 1;
+            isOpen = false;
         }
         producer.send(new ProducerRecord<String, String>(topic, message));
-        return 0;
     }
 
     public void close(){

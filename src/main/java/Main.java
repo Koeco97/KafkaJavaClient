@@ -14,19 +14,19 @@ public class Main {
         receiver = new Receiver(topicName);
 
         Thread producerThread = new Thread(()->{
-            while(true){
-                if(sender.send()==1){
-                    sender.close();
-                    receiver.close();
-                    return;
+            while(sender.isOpen()){
+                sender.send();
                 }
-        }});
+            sender.close();
+        });
         producerThread.start();
 
         Thread consumerThread = new Thread(()->{
-            while(true){
+            while(sender.isOpen()){
                 receiver.receive();
-            }});
+            }
+            receiver.close();
+        });
         consumerThread.start();
     }
 }
