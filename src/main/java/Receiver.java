@@ -35,7 +35,7 @@ public class Receiver{
         return props;
     }
 
-    public synchronized void receive(){
+    public void receive(){
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
         for (ConsumerRecord<String, String> record : records) {
             System.out.println(record.value());

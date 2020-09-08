@@ -40,7 +40,7 @@ public class Sender {
         return props;
     }
 
-    public synchronized void send(){
+    public  void send(){
         System.out.println("enter message");
         String message = scanner.nextLine();
         if (message.equals("exit")) {

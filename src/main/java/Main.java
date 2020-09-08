@@ -1,6 +1,7 @@
 import java.util.Scanner;
 
 public class Main {
+    static Object monitor = new Object();
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         TopicCreator topicCreator = new TopicCreator();
@@ -15,15 +16,29 @@ public class Main {
 
         Thread producerThread = new Thread(()->{
             while(sender.isOpen()){
-                sender.send();
+                synchronized (monitor) {
+                    sender.send();
                 }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             sender.close();
         });
         producerThread.start();
 
         Thread consumerThread = new Thread(()->{
             while(sender.isOpen()){
-                receiver.receive();
+                synchronized (monitor) {
+                    receiver.receive();
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             receiver.close();
         });
