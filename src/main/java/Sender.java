@@ -5,51 +5,39 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.Properties;
 import java.util.Scanner;
 
-public class Sender {
-    private String topic;
-    private Producer producer = createProducer();
-    Scanner scanner = new Scanner(System.in);
+public class Sender implements AutoCloseable {
+    private final String topic;
+    private final Producer producer;
+    private final Scanner scanner;
     private boolean isOpen = true;
 
     public Sender(String topic) {
         this.topic = topic;
+        this.producer = createProducer();
+        this.scanner = new Scanner(System.in);
     }
 
-    public boolean isOpen() {
+    public synchronized boolean isOpen() {
         return isOpen;
     }
 
 
-    private Producer createProducer(){
-        Properties props = setProperties();
+    private Producer createProducer() {
+        Properties props = KafkaProperties.getProducerProperties();
         return new KafkaProducer
                 <String, String>(props);
     }
-    private Properties setProperties() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("acks", "all");
-        props.put("retries", 0);
-        props.put("batch.size", 16384);
-        props.put("linger.ms", 1);
-        props.put("buffer.memory", 33554432);
-        props.put("key.serializer",
-                "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer",
-                "org.apache.kafka.common.serialization.StringSerializer");
-        return props;
-    }
 
-    public  void send(){
+    public void send() {
         System.out.println("enter message");
         String message = scanner.nextLine();
-        if (message.equals("exit")) {
+        if (message.equalsIgnoreCase("exit")) {
             isOpen = false;
         }
         producer.send(new ProducerRecord<String, String>(topic, message));
     }
 
-    public void close(){
+    public void close() {
         producer.close();
     }
 }

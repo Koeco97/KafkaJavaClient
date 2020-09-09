@@ -1,7 +1,10 @@
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
     static Object monitor = new Object();
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         TopicCreator topicCreator = new TopicCreator();
@@ -14,34 +17,39 @@ public class Main {
         sender = new Sender(topicName);
         receiver = new Receiver(topicName);
 
-        Thread producerThread = new Thread(()->{
-            while(sender.isOpen()){
-                synchronized (monitor) {
-                    sender.send();
-                }
-                try {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        executor.submit(() -> {
+            try (sender) {
+                while (true) {
+                    synchronized (monitor) {
+                        if (!sender.isOpen()) {
+                            break;
+                        }
+                        sender.send();
+                    }
                     Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            sender.close();
         });
-        producerThread.start();
 
-        Thread consumerThread = new Thread(()->{
-            while(sender.isOpen()){
-                synchronized (monitor) {
-                    receiver.receive();
-                }
-                try {
+        executor.submit(() -> {
+            try (receiver) {
+                while (true) {
+                    synchronized (monitor) {
+                        if (!sender.isOpen()) {
+                            break;
+                        }
+                        receiver.receive();
+                    }
                     Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            receiver.close();
         });
-        consumerThread.start();
+
+        executor.shutdown();
     }
 }

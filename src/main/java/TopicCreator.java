@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Properties;
 
 public class TopicCreator {
-    public void createTopic(String topicName){
+    public void createTopic(String topicName) {
         Properties config = new Properties();
         config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         AdminClient admin = AdminClient.create(config);
