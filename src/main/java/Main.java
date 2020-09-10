@@ -3,8 +3,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
-    static Object monitor = new Object();
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         TopicCreator topicCreator = new TopicCreator();
@@ -21,12 +19,10 @@ public class Main {
         executor.submit(() -> {
             try (sender) {
                 while (true) {
-                    synchronized (monitor) {
-                        if (!sender.isOpen()) {
-                            break;
-                        }
-                        sender.send();
+                    if (!sender.isOpen()) {
+                        break;
                     }
+                    sender.send();
                     Thread.sleep(10);
                 }
             } catch (InterruptedException e) {
@@ -37,12 +33,10 @@ public class Main {
         executor.submit(() -> {
             try (receiver) {
                 while (true) {
-                    synchronized (monitor) {
-                        if (!sender.isOpen()) {
-                            break;
-                        }
-                        receiver.receive();
+                    if (!sender.isOpen()) {
+                        break;
                     }
+                    receiver.receive();
                     Thread.sleep(10);
                 }
             } catch (InterruptedException e) {

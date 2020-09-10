@@ -25,7 +25,6 @@ public class Receiver implements AutoCloseable {
         for (ConsumerRecord<String, String> record : records) {
             System.out.println(record.value());
         }
-        consumer.commitAsync();
     }
 
     public void close() {
