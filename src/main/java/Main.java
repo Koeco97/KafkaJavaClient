@@ -19,7 +19,7 @@ public class Main {
         executor.submit(() -> {
             try (sender) {
                 while (true) {
-                    if (!sender.isOpen()) {
+                    if (!sender.isOpen().get()) {
                         break;
                     }
                     sender.send();
@@ -33,7 +33,7 @@ public class Main {
         executor.submit(() -> {
             try (receiver) {
                 while (true) {
-                    if (!sender.isOpen()) {
+                    if (!sender.isOpen().get()) {
                         break;
                     }
                     receiver.receive();

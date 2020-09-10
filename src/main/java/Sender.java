@@ -4,12 +4,13 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Sender implements AutoCloseable {
     private final String topic;
     private final Producer producer;
     private final Scanner scanner;
-    private boolean isOpen = true;
+    private AtomicBoolean isOpen = new AtomicBoolean(true);
 
     public Sender(String topic) {
         this.topic = topic;
@@ -17,10 +18,9 @@ public class Sender implements AutoCloseable {
         this.scanner = new Scanner(System.in);
     }
 
-    public synchronized boolean isOpen() {
+    public AtomicBoolean isOpen() {
         return isOpen;
     }
-
 
     private Producer createProducer() {
         Properties props = KafkaProperties.getProducerProperties();
@@ -32,7 +32,7 @@ public class Sender implements AutoCloseable {
         System.out.println("enter message");
         String message = scanner.nextLine();
         if (message.equalsIgnoreCase("exit")) {
-            isOpen = false;
+            isOpen.set(false);
         }
         producer.send(new ProducerRecord<String, String>(topic, message));
     }
